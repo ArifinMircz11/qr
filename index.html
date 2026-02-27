@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Generator Sekolah - ZIP & Auto-Generate</title>
+    <title>QR Code Generator Sekolah - High Definition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
-    <!-- Library untuk membaca Excel (.xlsx) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- Library untuk membuat file ZIP -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
@@ -16,7 +14,7 @@
         
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #f8fafc;
+            background-color: #f1f5f9;
         }
 
         .glass-card {
@@ -25,10 +23,23 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
-        .qr-item canvas {
-            max-width: 100%;
+        /* Memastikan canvas QR Code selalu muat di dalam kontainer kartu */
+        canvas {
+            max-width: 100% !important;
             height: auto !important;
-            border-radius: 8px;
+            aspect-ratio: 1 / 1;
+        }
+
+        .qr-card-container {
+            transition: all 0.3s ease;
+            background: white;
+            border: 1px solid #e2e8f0;
+            max-width: 100%;
+        }
+
+        .qr-card-container:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
         @media print {
@@ -37,14 +48,13 @@
             .print-grid {
                 display: grid !important;
                 grid-template-columns: repeat(3, 1fr) !important;
-                gap: 15px !important;
+                gap: 10px !important;
                 width: 100% !important;
             }
-            .qr-item {
+            .qr-card-container {
                 break-inside: avoid;
-                border: 1px solid #e2e8f0 !important;
-                padding: 10px !important;
                 box-shadow: none !important;
+                border: 1px solid #eee !important;
             }
         }
     </style>
@@ -53,93 +63,92 @@
 
     <div class="max-w-7xl mx-auto">
         <header class="mb-8 text-center md:text-left no-print">
-            <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Bulk QR Generator <span class="text-teal-600 italic underline">IMAM</span></h1>
-            <p class="text-slate-500 mt-2">QR Code Massal - Download ZIP & Auto-Generate</p>
+            <div class="flex items-center justify-center md:justify-start gap-3">
+                <div class="bg-teal-600 p-2 rounded-lg text-white">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Bulk QR Generator <span class="text-teal-600 italic underline">IMAM</span></h1>
+                    <p class="text-slate-500 text-sm font-medium">Ultra High Definition - Anti Pecah</p>
+                </div>
+            </div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            
-            <!-- Panel Kontrol -->
             <div class="lg:col-span-1 space-y-6 no-print">
                 <div class="glass-card p-6 rounded-[2rem] shadow-xl border border-slate-100">
-                    
-                    <!-- Download Template Excel -->
                     <div class="mb-6">
-                        <label class="block text-xs font-bold text-teal-700 uppercase tracking-widest mb-2">1. Unduh Template</label>
+                        <label class="block text-[10px] font-bold text-teal-700 uppercase tracking-widest mb-2">Langkah 1</label>
                         <button onclick="downloadExcelTemplate()" class="w-full flex items-center justify-center gap-2 py-3 px-4 bg-teal-50 hover:bg-teal-100 text-teal-700 rounded-xl text-sm font-semibold transition-all">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                            Template Excel (.xlsx)
+                            Download Template
                         </button>
                     </div>
 
-                    <!-- Upload Excel -->
                     <div class="mb-6">
-                        <label class="block text-xs font-bold text-teal-700 uppercase tracking-widest mb-2">2. Upload Data Excel</label>
+                        <label class="block text-[10px] font-bold text-teal-700 uppercase tracking-widest mb-2">Langkah 2</label>
                         <div class="relative border-2 border-dashed border-slate-200 rounded-xl p-4 hover:border-teal-500 transition-colors group">
                             <input type="file" id="excel-upload" accept=".xlsx, .xls" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
                             <div class="text-center">
-                                <svg class="mx-auto h-8 w-8 text-slate-400 group-hover:text-teal-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                <p class="text-xs text-slate-500 mt-2 font-medium">Pilih File Excel Anda</p>
+                                <svg class="mx-auto h-8 w-8 text-slate-400 group-hover:text-teal-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                <p id="excel-label" class="text-[11px] text-slate-500 mt-2 font-medium">Upload Excel (.xlsx)</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Desain -->
                     <div class="space-y-4 pt-4 border-t border-slate-100">
-                        <label class="block text-xs font-bold text-teal-700 uppercase tracking-widest">3. Kustomisasi</label>
+                        <label class="block text-[10px] font-bold text-teal-700 uppercase tracking-widest">Langkah 3: Desain</label>
                         <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="text-[10px] font-bold text-slate-400 uppercase">Warna QR</label>
-                                <input type="color" id="color-dots" value="#1199a8" class="h-10 w-full rounded-lg cursor-pointer">
+                                <label class="text-[9px] font-bold text-slate-400 uppercase">Warna QR</label>
+                                <input type="color" id="color-dots" value="#111827" class="h-9 w-full rounded-lg cursor-pointer">
                             </div>
                             <div>
-                                <label class="text-[10px] font-bold text-slate-400 uppercase">Bingkai</label>
-                                <input type="color" id="color-corners" value="#fccb05" class="h-10 w-full rounded-lg cursor-pointer">
+                                <label class="text-[9px] font-bold text-slate-400 uppercase">Sudut</label>
+                                <input type="color" id="color-corners" value="#0d9488" class="h-9 w-full rounded-lg cursor-pointer">
                             </div>
                         </div>
                         <div>
-                            <label class="text-[10px] font-bold text-slate-400 uppercase">Logo Sekolah</label>
-                            <input type="file" id="logo-upload" accept="image/*" class="w-full text-xs text-slate-500 mt-1 file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-[10px] file:bg-teal-50 file:text-teal-700">
+                            <label class="text-[9px] font-bold text-slate-400 uppercase">Logo PNG (Transparan)</label>
+                            <input type="file" id="logo-upload" accept="image/*" class="w-full text-[10px] text-slate-500 mt-1 file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-[10px] file:bg-teal-50 file:text-teal-700">
                         </div>
                     </div>
 
                     <div class="pt-6">
-                        <button onclick="processData()" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        <button onclick="processData()" class="w-full bg-slate-800 hover:bg-black text-white text-sm font-bold py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                             Refresh Generator
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Hasil Pratinjau -->
             <div class="lg:col-span-3">
                 <div class="bg-white rounded-[2rem] shadow-xl p-6 min-h-[600px] border border-slate-50 flex flex-col">
                     <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4 no-print">
                         <div>
-                            <h2 class="font-bold text-slate-800 text-lg">Pratinjau QR Code</h2>
-                            <p class="text-xs text-slate-400"><span id="count">0</span> data terdeteksi</p>
+                            <h2 class="font-bold text-slate-800 text-lg">Pratinjau QR Code HD</h2>
+                            <p class="text-xs text-slate-400 font-medium">Data: <span id="count" class="text-teal-600 font-bold">0</span> | Kualitas: <span class="text-teal-600 font-bold">1000px</span></p>
                         </div>
                         <div class="flex gap-2 w-full sm:w-auto">
-                            <button id="btn-zip" onclick="downloadAllAsZip()" class="hidden flex-1 sm:flex-none text-xs bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
+                            <button id="btn-zip" onclick="downloadAllAsZip()" class="hidden flex-1 sm:flex-none text-[11px] bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                Download Semua (ZIP)
+                                DOWNLOAD ZIP
                             </button>
-                            <button id="btn-print" onclick="window.print()" class="hidden flex-1 sm:flex-none text-xs bg-slate-800 hover:bg-black text-white px-5 py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
+                            <button id="btn-print" onclick="window.print()" class="hidden flex-1 sm:flex-none text-[11px] bg-slate-800 hover:bg-black text-white px-5 py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                                Cetak PDF
+                                CETAK PDF
                             </button>
                         </div>
                     </div>
 
-                    <div id="bulk-container" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-6 print-grid">
+                    <div id="bulk-container" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 print-grid overflow-y-auto max-h-[70vh]">
                         <div class="col-span-full flex flex-col items-center justify-center py-32 text-slate-300">
-                            <svg class="w-16 h-16 mb-4 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                            <p class="italic text-center">Silakan unggah file Excel untuk otomatis menghasilkan QR Code.</p>
+                             <p class="italic text-sm">Upload Excel untuk melihat hasil...</p>
                         </div>
                     </div>
                     
-                    <div id="status-msg" class="mt-auto pt-6 text-center text-xs text-slate-400 no-print"></div>
+                    <div id="status-msg" class="mt-auto pt-6 text-center text-[10px] text-teal-600 font-bold uppercase tracking-widest no-print"></div>
                 </div>
             </div>
         </div>
@@ -148,19 +157,18 @@
     <script>
         let logoData = "";
         let bulkData = [];
-        let qrInstances = []; // Menyimpan objek qr-code-styling untuk download ZIP
+        let qrInstances = [];
 
         function downloadExcelTemplate() {
             const data = [
                 ["QR_Code", "Nama", "Kelas"],
-                ["https://sekolah.id/absen/001", "Budi Santoso", "10-A"],
-                ["https://sekolah.id/absen/002", "Siti Aminah", "11-B"],
-                ["NISN12345678", "Joko Widodo", "12-C"]
+                ["https://sekolah.id/1", "Ahmad Fadhil", "10-IPA"],
+                ["https://sekolah.id/2", "Salsa Bella", "11-IPS"]
             ];
             const ws = XLSX.utils.aoa_to_sheet(data);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Data QR");
-            XLSX.writeFile(wb, "Template_QR_Imam.xlsx");
+            XLSX.writeFile(wb, "Template_QR_HD.xlsx");
         }
 
         document.getElementById('logo-upload').addEventListener('change', function(e) {
@@ -169,26 +177,51 @@
                 const reader = new FileReader();
                 reader.onload = (ev) => { 
                     logoData = ev.target.result; 
-                    if(bulkData.length > 0) processData(); // Auto refresh jika sudah ada data
+                    if(bulkData.length > 0) processData();
                 };
                 reader.readAsDataURL(file);
             }
         });
 
-        // Event Listener: Otomatis proses saat file dipilih
         document.getElementById('excel-upload').addEventListener('change', function(e) {
             const file = e.target.files[0];
+            const label = document.getElementById('excel-label');
+            const statusMsg = document.getElementById('status-msg');
+            
             if (file) {
+                // Validasi ekstensi file sederhana
+                const ext = file.name.split('.').pop().toLowerCase();
+                if (ext !== 'xlsx' && ext !== 'xls') {
+                    if (statusMsg) statusMsg.innerText = "EROR: MOHON UNGGAH FILE EXCEL (.XLSX / .XLS), BUKAN GAMBAR!";
+                    label.innerText = "File Tidak Valid!";
+                    return;
+                }
+
+                label.innerText = file.name;
                 const reader = new FileReader();
                 reader.onload = function(event) {
-                    const data = new Uint8Array(event.target.result);
-                    const workbook = XLSX.read(data, {type: 'array'});
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const json = XLSX.utils.sheet_to_json(worksheet);
-                    
-                    bulkData = json.filter(row => row.QR_Code);
-                    document.getElementById('count').innerText = bulkData.length;
-                    processData(); // Menampilkan QR Code langsung setelah upload
+                    try {
+                        const data = new Uint8Array(event.target.result);
+                        const workbook = XLSX.read(data, {type: 'array'});
+                        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const json = XLSX.utils.sheet_to_json(worksheet);
+                        
+                        bulkData = json.filter(row => row.QR_Code);
+                        
+                        if (bulkData.length === 0) {
+                            if (statusMsg) statusMsg.innerText = "EROR: KOLOM 'QR_Code' TIDAK DITEMUKAN ATAU KOSONG!";
+                            return;
+                        }
+
+                        const countEl = document.getElementById('count');
+                        if (countEl) countEl.innerText = bulkData.length;
+                        if (statusMsg) statusMsg.innerText = "DATA BERHASIL DIMUAT";
+                        
+                        processData();
+                    } catch (err) {
+                        console.error("Gagal membaca file Excel:", err);
+                        if (statusMsg) statusMsg.innerText = "EROR: FORMAT FILE RUSAK ATAU BUKAN SPREADSHEET!";
+                    }
                 };
                 reader.readAsArrayBuffer(file);
             }
@@ -196,6 +229,8 @@
 
         async function processData() {
             const container = document.getElementById('bulk-container');
+            if (!container) return;
+            
             container.innerHTML = "";
             qrInstances = [];
             
@@ -209,25 +244,28 @@
 
             for (const [index, row] of bulkData.entries()) {
                 const wrapper = document.createElement('div');
-                wrapper.className = "qr-item bg-white p-4 rounded-2xl border border-slate-100 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-shadow relative group";
+                wrapper.className = "qr-card-container p-3 rounded-2xl flex flex-col items-center relative group";
                 
                 const qrDiv = document.createElement('div');
                 qrDiv.id = `qr-node-${index}`;
-                qrDiv.className = "mb-4 bg-white";
+                qrDiv.className = "w-full flex justify-center items-center overflow-hidden";
                 
                 const infoDiv = document.createElement('div');
-                infoDiv.className = "w-full border-t pt-3 mt-auto";
+                infoDiv.className = "w-full mt-2 px-2 py-1.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center gap-2 overflow-hidden";
                 
-                const nameLabel = document.createElement('p');
-                nameLabel.className = "text-xs font-bold text-slate-800 uppercase truncate";
-                nameLabel.innerText = row.Nama || "Tanpa Nama";
+                const nameLabel = document.createElement('span');
+                nameLabel.className = "text-[9px] font-bold text-slate-800 uppercase truncate";
+                nameLabel.innerText = row.Nama || "NO NAME";
 
-                const classLabel = document.createElement('p');
-                classLabel.className = "text-[10px] text-teal-600 font-semibold tracking-wider";
+                const divider = document.createElement('span');
+                divider.className = "w-[1px] h-2.5 bg-slate-300";
+
+                const classLabel = document.createElement('span');
+                classLabel.className = "text-[9px] text-teal-600 font-bold whitespace-nowrap";
                 classLabel.innerText = row.Kelas || "-";
 
                 const dlBtn = document.createElement('button');
-                dlBtn.className = "no-print absolute top-2 right-2 p-1.5 bg-slate-100 text-slate-400 rounded-full hover:bg-teal-600 hover:text-white transition-colors opacity-0 group-hover:opacity-100";
+                dlBtn.className = "no-print absolute top-1 right-1 p-1 bg-white shadow-sm border text-slate-400 rounded-full hover:bg-teal-600 hover:text-white transition-all opacity-0 group-hover:opacity-100 z-10";
                 dlBtn.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>';
                 
                 const fileName = `${row.Nama || 'QR'}_${row.Kelas || 'Data'}`.replace(/[^a-z0-9]/gi, '_');
@@ -235,53 +273,55 @@
                 wrapper.appendChild(dlBtn);
                 wrapper.appendChild(qrDiv);
                 infoDiv.appendChild(nameLabel);
+                infoDiv.appendChild(divider);
                 infoDiv.appendChild(classLabel);
                 wrapper.appendChild(infoDiv);
                 container.appendChild(wrapper);
 
                 const qr = new QRCodeStyling({
-                    width: 250,
-                    height: 250,
+                    width: 1000,
+                    height: 1000,
                     data: String(row.QR_Code),
                     image: logoData,
+                    backgroundOptions: { color: "transparent" },
                     dotsOptions: { color: dotColor, type: "rounded" },
                     cornersSquareOptions: { color: cornerColor, type: "extra-rounded" },
                     cornersDotOptions: { color: dotColor, type: "dot" },
-                    imageOptions: { margin: 4, imageSize: 0.4 },
+                    imageOptions: { 
+                        margin: 5, 
+                        imageSize: 0.4, 
+                        crossOrigin: "anonymous",
+                        hideBackgroundDots: true 
+                    },
                     qrOptions: { errorCorrectionLevel: "H" }
                 });
 
                 qr.append(qrDiv);
-                
-                // Simpan instance untuk download ZIP nantinya
                 qrInstances.push({ qr, fileName });
-                
                 dlBtn.onclick = () => qr.download({ name: fileName, extension: "png" });
             }
         }
 
         async function downloadAllAsZip() {
             if (qrInstances.length === 0) return;
-            
             const zip = new JSZip();
             const statusMsg = document.getElementById('status-msg');
-            statusMsg.innerText = "Sedang menyiapkan file ZIP, mohon tunggu...";
+            if (statusMsg) statusMsg.innerText = "MERENDER GAMBAR HD (TAJAM)...";
             
-            const promises = qrInstances.map(async (item) => {
-                // Mendapatkan blob dari QR Code Styling
-                const blob = await item.qr.getRawData("png");
-                zip.file(`${item.fileName}.png`, blob);
-            });
-
             try {
+                const promises = qrInstances.map(async (item) => {
+                    const blob = await item.qr.getRawData("png");
+                    zip.file(`${item.fileName}.png`, blob);
+                });
+                
                 await Promise.all(promises);
                 const content = await zip.generateAsync({type:"blob"});
-                saveAs(content, "Kumpulan_QR_Sekolah.zip");
-                statusMsg.innerText = "Download ZIP Berhasil!";
-                setTimeout(() => statusMsg.innerText = "", 3000);
+                saveAs(content, "Data_QR_HD_Imam.zip");
+                if (statusMsg) statusMsg.innerText = "DOWNLOAD BERHASIL!";
+                setTimeout(() => { if (statusMsg) statusMsg.innerText = ""; }, 4000);
             } catch (err) {
+                if (statusMsg) statusMsg.innerText = "TERJADI KESALAHAN EKSPOR!";
                 console.error(err);
-                statusMsg.innerText = "Gagal membuat file ZIP.";
             }
         }
     </script>
